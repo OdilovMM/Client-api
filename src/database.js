@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 const { createLogger } = require("./shared/globals/logger");
+const { config } = require("./config");
 
 const log = createLogger("database");
 
 const MyDatabase = () => {
   const connect = () => {
     mongoose
-      .connect(process.env.DB_URL, {})
+      .connect(config.DB_URL, {})
       .then(() => {
         console.log("DB connection success!");
       })

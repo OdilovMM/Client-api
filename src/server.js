@@ -1,5 +1,3 @@
-const dotenv = require("dotenv");
-dotenv.config();
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
@@ -13,13 +11,11 @@ const { Server } = require("socket.io");
 const { createClient } = require("redis");
 const { createAdapter } = require("@socket.io/redis-adapter");
 
-const bunyan = require("bunyan");
-const apiStats = require("swagger-stats");
-const asyncError = require("express-async-errors");
 const morgan = require("morgan");
 const router = require("./routes");
 const { CustomError } = require("./shared/globals/helpers/errorHandler");
 const { createLogger } = require("./shared/globals/logger");
+const { config } = require("./config");
 
 const log = createLogger("server");
 
@@ -40,9 +36,9 @@ class MyServer {
     this.app.use(
       cookieSession({
         name: "session",
-        keys: [process.env.JWT_SECRET_ONE, process.env.JWT_SECRET_TWO],
+        keys: [config.JWT_SECRET_ONE, config.JWT_SECRET_TWO],
         maxAge: 24 * 7 * 3600000,
-        secure: process.env.NODE_ENV !== "development",
+        secure: config.NODE_ENV !== "development",
         sameSite: "none",
       })
     );
@@ -50,7 +46,7 @@ class MyServer {
     this.app.use(helmet());
     this.app.use(
       cors({
-        origin: process.env.CLIENT_URL,
+        origin: config.CLIENT_URL,
         credentials: true,
         optionsSuccessStatus: 200,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -104,7 +100,7 @@ class MyServer {
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       },
     });
-    const pubClient = createClient({ url: process.env.REDIS_HOST });
+    const pubClient = createClient({ url: config.REDIS_HOST });
     const subClient = pubClient.duplicate();
     await Promise.all([pubClient.connect(), subClient.connect()]);
     io.adapter(createAdapter(pubClient, subClient));
@@ -113,9 +109,9 @@ class MyServer {
 
   startHttpServer() {
     console.log(`Server started ${process.pid}`);
-    const port = process.env.PORT || 4000;
+    const port = config.PORT;
     const server = http.createServer(this.app);
-    server.listen(port || 4000, () => {
+    server.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
   }

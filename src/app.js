@@ -1,8 +1,9 @@
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, 'config.env') });
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "config.env") });
 const express = require("express");
 const MyServer = require("./server");
 const MyDatabase = require("./database");
+const { config } = require("./config");
 const app = express();
 
 class Application {
@@ -10,6 +11,11 @@ class Application {
     MyDatabase();
     const server = new MyServer(app);
     server.start();
+  }
+
+  loadConfig() {
+    config.validateConfig();
+    config.cloudinaryConfig();
   }
 }
 
